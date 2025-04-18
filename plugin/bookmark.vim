@@ -67,15 +67,15 @@ function! BookmarkToggle()
     if g:bookmark_show_toggle_warning ==# 1 && bm#is_bookmark_has_annotation_by_line(file, current_line)
       let delete = confirm("Delete Annotated bookmarks?", "&Yes\n&No", 2)
       if (delete !=# 1)
-        echo "Ignore!"
+        "echo "Ignore!"
         return
       endif
     endif
     call s:bookmark_remove(file, current_line)
-    echo "Bookmark removed"
+    "echo "Bookmark removed"
   else
     call s:bookmark_add(file, current_line)
-    echo "Bookmark added"
+    "echo "Bookmark added"
   endif
 endfunction
 command! ToggleBookmark call CallDeprecatedCommand('BookmarkToggle', [])
@@ -117,12 +117,12 @@ function! BookmarkAnnotate(...)
           \   ? "updated: ". new_annotation
           \   : "added: ". new_annotation
     call bm_sign#update_at(file, bm['sign_idx'], bm['line_nr'], bm['annotation'] !=# "")
-    echo "Annotation ". result_msg
+    "echo "Annotation ". result_msg
 
   " Create bookmark with annotation
   elseif new_annotation !=# ""
     call s:bookmark_add(file, current_line, new_annotation)
-    echo "Bookmark added with annotation: ". new_annotation
+    "echo "Bookmark added with annotation: ". new_annotation
   endif
 endfunction
 command! -nargs=* Annotate call CallDeprecatedCommand('BookmarkAnnotate', [<q-args>, 0])
@@ -135,7 +135,7 @@ function! BookmarkClear()
   for line_nr in lines
     call s:bookmark_remove(file, line_nr)
   endfor
-  echo "Bookmarks removed"
+  "echo "Bookmarks removed"
 endfunction
 command! ClearBookmarks call CallDeprecatedCommand('BookmarkClear', [])
 command! BookmarkClear call BookmarkClear()
@@ -154,7 +154,7 @@ function! BookmarkClearAll(silent)
     call s:remove_all_bookmarks()
     if (!a:silent)
       execute ":redraw!"
-      echo "All bookmarks removed"
+      "echo "All bookmarks removed"
     endif
   endif
 endfunction
@@ -212,7 +212,7 @@ function! BookmarkSave(target_file, silent)
     let serialized_bookmarks = bm#serialize()
     call writefile(serialized_bookmarks, a:target_file)
     if (!a:silent)
-      echo "All bookmarks saved"
+      "echo "All bookmarks saved"
     endif
   elseif (g:bookmark_save_per_working_dir || g:bookmark_manage_per_buffer)
     call delete(a:target_file) " remove file, if no bookmarks
@@ -238,13 +238,13 @@ function! BookmarkLoad(target_file, startup, silent)
           call bm_sign#add_at(entry['file'], entry['sign_idx'], entry['line_nr'], entry['annotation'] !=# "")
         endfor
         if (!a:silent)
-          echo "Bookmarks loaded"
+          "echo "Bookmarks loaded"
         endif
         return 1
       endif
     catch
       if (!a:startup && !a:silent)
-        echo "Failed to load/parse file"
+        "echo "Failed to load/parse file"
       endif
       return 0
     endtry
@@ -254,7 +254,7 @@ command! -nargs=1 LoadBookmarks call CallDeprecatedCommand('BookmarkLoad', [<f-a
 command! -nargs=1 BookmarkLoad call BookmarkLoad(<f-args>, 0, 0)
 
 function! CallDeprecatedCommand(fun, args)
-  echo "Warning: Deprecated command, please use ':". a:fun ."' instead"
+  "echo "Warning: Deprecated command, please use ':". a:fun ."' instead"
   let Fn = function(a:fun)
   return call(Fn, a:args)
 endfunction
@@ -284,11 +284,11 @@ function! BookmarkMoveToLine(target)
     "ensure we're trying to move to a valid line nr
     let max_line_nr = line('$')
     if a:target <= 0 || a:target > max_line_nr
-      echo "Can't move bookmark beyond file bounds"
+      "echo "Can't move bookmark beyond file bounds"
       return
     endif
     if bm#has_bookmark_at_line(file, a:target)
-      echo "Hit another bookmark"
+      "echo "Hit another bookmark"
       return
     endif
 
@@ -319,7 +319,7 @@ command! -nargs=? BookmarkMoveToLine call s:move_absolute(<q-args>)
 " direction is {-1,1}
 function! s:move_relative(arg, direction)
   if !s:has_bookmark_at_cursor()
-    echo 'No bookmark at current line'
+    "echo 'No bookmark at current line'
     return
   endif
   " ''        => direction
@@ -334,7 +334,7 @@ function! s:move_relative(arg, direction)
   elseif a:arg =~# '\v^\d+$'
     let delta = str2nr(a:arg) * a:direction
   else
-    echo 'Invalid line count'
+    "echo 'Invalid line count'
     return
   endif
   let delta = (delta == 0) ? a:direction : delta
@@ -345,7 +345,7 @@ endfunction
 " arg is always a string
 function! s:move_absolute(arg)
   if !s:has_bookmark_at_cursor()
-    echo 'No bookmark at current line'
+    "echo 'No bookmark at current line'
     return
   endif
   " ''              => prompt
@@ -360,19 +360,19 @@ function! s:move_absolute(arg)
   elseif a:arg =~# '\v^\d+$'
     let target = str2nr(a:arg)
   else
-    echo 'Invalid line number'
+    "echo 'Invalid line number'
     return
   endif
   if target == 0
       let target = input("Enter target line number: ")
       " clear the line for subsequent messages
-      echo "\r"
+      "echo "\r"
       " if 'abc<Esc>' or '<empty><Enter>' (indistinguishable), cancel with no error message
       if empty(target)
         return
       endif
       if target !~# '\v^\d+$'
-        echo "Invalid line number"
+        "echo "Invalid line number"
         return
       endif
       let target = str2nr(target)
@@ -434,7 +434,7 @@ function! s:jump_to_bookmark(type)
   let file = expand("%:p")
   let line_nr = bm#{a:type}(file, line("."))
   if line_nr ==# 0
-    echo "No bookmarks found"
+    "echo "No bookmarks found"
   else
     call cursor(line_nr, 1)
     normal! ^
@@ -444,7 +444,7 @@ function! s:jump_to_bookmark(type)
     let bm = bm#get_bookmark_by_line(file, line_nr)
     let annotation = bm['annotation'] !=# "" ? " (". bm['annotation'] . ")" : ""
     execute ":redraw!"
-    echo "Jumped to bookmark". annotation
+    "echo "Jumped to bookmark". annotation
   endif
 endfunction
 
@@ -548,9 +548,9 @@ function! s:display_annotation()
   let bm = has_bm ? bm#get_bookmark_by_line(file, current_line) : 0
   let annotation = has_bm ? bm['annotation'] : ""
   if annotation !=# ""
-      echo "Bookmark annotation: ". annotation
+      "echo "Bookmark annotation: ". annotation
   else
-      echo
+      "echo
   endif
 endfunction
 
